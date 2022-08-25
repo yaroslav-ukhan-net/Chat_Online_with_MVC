@@ -1,0 +1,149 @@
+﻿@model Chat_MVC.ViewModels.ChatMessageViewModel
+
+<form asp-action="Send">
+
+    <div class="form-horizontal">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <h4>Chat: @Model.Name</h4>
+            <header class="navbar navbar-expand-sm navbar-light bg-white border-bottom">
+                <div class="container">
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                Accounts:
+                            </li>
+                            @for (var j = 0; j < Model.AllChats.Count; j++)
+                            {
+                                @if (!Model.AllChats[j].IsGroup)
+                                {
+                                    <li class="nav-item">
+                                        @Html.ActionLink(Model.AllChats[j].Name, "ChooseUser", "Chat", new { IdChat = Model.Id, IdUser = Model.AllChats[j].Id }) |
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </header>
+        </nav>
+        @Html.HiddenFor(m => Model.Id)
+        <div class="container">
+            <table border-collapse="collaps">
+                <tr>
+                    <td class="align-top" >
+                        <table class="table table-bordered" style="border-collapse:separate">
+
+                            @for (var j = 0; j < Model.AllChats.Count; j++)
+                            {
+                                @if (Model.AllChats[j].IsGroup)
+                                {
+                                    <tr>
+                                        <td bgcolor="#D3EDF6" style="padding:0px">
+                                            <a class="nav-link text-dark" asp-controller="Chat" asp-action="Chats" asp-route-id="@Model.AllChats[j].Id">@Model.AllChats[j].Name</a>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td class="alert-dark" style="padding:0px">
+                                            <a class="nav-link text-dark" asp-controller="Chat" asp-action="Chats" asp-route-id="@Model.AllChats[j].Id">@Model.AllChats[j].Name</a>
+                                        </td>
+                                    </tr>
+
+                                }
+                            }
+                        </table>
+                    </td>
+                    <td width="100%" style="vertical-align:top">
+                        <table class="table">
+
+                            <tbody>
+                                @for (var i = 0; i < Model.Messages.Count; i++)
+                                {
+                                    <tr>
+                                        
+                                        <td style="
+    padding-top: 0px;
+    padding-left: 10px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+">
+                                            @if (Model.Messages[i].WithAnswer)
+                                                {
+                                            <i style="color: #128DFF ">↳@@@Model.Messages[i].AnswerText</i>
+                                                }
+                                        <p>@Model.Messages[i].Name 
+                                            @if (Model.Messages[i].Edited) {
+                                            <sub>
+                                                (✎ред.)
+                                            </sub>
+                                            }
+                                            <sub>(@Model.Messages[i].Date.ToString("g"))</sub> : @Model.Messages[i].Text</p>
+</td>
+
+                                        <td width="190" style="padding:0px">
+                                            @if (Model.Messages[i].IdSender == Convert.ToInt32(ViewData["IdSender"]))
+                                            {
+                                                <i>
+                                                    @Html.ActionLink("Edit", "Edit", "Chat", new { IdChat = Model.Id, Id = Model.Messages[i].Id })
+                                                </i><br />
+                                                <i>
+                                                    Delete (
+                                                    @Html.ActionLink("for me/", "DeleteMe", "Chat", new { IdChat = Model.Id, Id = Model.Messages[i].Id })
+                                                    @Html.ActionLink("for all", "DeleteAll", "Chat", new { IdChat = Model.Id, Id = Model.Messages[i].Id })
+                                                    )
+                                                </i><br />
+                                            }
+                                            @if (Model.IsGroup)
+                                            {
+                                                <i>
+                                                    Answer (
+                                                    @Html.ActionLink("Private/", "Answer_for_message", "Chat", new { IdChat = Model.Messages[i].IdSender, Id = Model.Messages[i].Id })
+                                                    @Html.ActionLink("Here", "Answer_for_message", "Chat", new { IdChat = Model.Id, Id = Model.Messages[i].Id })
+                                                    )
+                                                </i>
+                                            }
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <div class="form-group" style="text-align:center">
+                @Html.ActionLink("Previous⬅", "PageNubmer", "Chat", new { IdChat = Model.Id, Number = (Model.pageNubmer+1) })
+                @Html.ActionLink("➡Next", "PageNubmer", "Chat", new { IdChat = Model.Id, Number = (Model.pageNubmer-1) })
+                <p>
+                    @if (Model.message.WithAnswer)
+                    {
+                        <i>@Model.message.AnswerText</i>
+                    }
+                    @if (Model.message.Text != null)
+                    {
+                        <i>(✎ред.) @Model.message.Text</i>
+                    }
+                </p>
+                <div class="offset-md-1 col-lg-10">
+                    @ViewData["NameSender"]:
+                    @if (Model.message.Text != null)
+                    {
+                        <input type="hidden" asp-for="message.Id" />
+                    }
+                    <input type="text" asp-for="message.Text" autofocus />
+                    <span asp-validation-for="message.Text" class="text-danger"></span>
+                    <input type="hidden" asp-for="message.ChatId" />
+                    <input type="hidden" asp-for="message.IdSender" />
+                    <input type="hidden" asp-for="message.IsVisible" />
+                    <input type="hidden" asp-for="message.WithAnswer" />
+                    <input type="hidden" asp-for="message.AnswerText" />
+                    <input type="hidden" asp-for="message.Edited" />
+                    <input type="submit" value="Send" class="btn btn-primary" />
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
